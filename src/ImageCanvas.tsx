@@ -12,6 +12,30 @@ const ImageCanvas = (props: ImageCanvasProps) => {
     const imgRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
+        window.onresize = () => {
+            if (imgRef.current) {
+            const ratio = imgRef.current.width / imgRef.current.height;
+            console.log(imgRef.current.width )
+            console.log("ldsllgd")
+            console.log("src", imgRef.current.src)
+            console.log("Ratio", ratio)
+            if (imgRef.current) {
+                if (ratio > 1) {
+                    imgRef.current.width = window.innerWidth;
+                    imgRef.current.height = window.innerWidth/ratio;
+                } else if (ratio < 1) {
+                    imgRef.current.height = window.innerHeight;
+                    imgRef.current.width = window.innerHeight * ratio
+                } else {
+                    imgRef.current.width = window.innerWidth;
+                    imgRef.current.height = window.innerHeight;
+                }
+            }
+        }
+        }
+    }, [])
+
+    useEffect(() => {
         if (props.imageFile && fileReaderRef.current) {
             fileReaderRef.current.readAsDataURL(props.imageFile);
         }
