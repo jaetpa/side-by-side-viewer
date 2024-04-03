@@ -3,82 +3,90 @@ import "./ImageCanvas.css"
 
 interface ImageCanvasProps {
     imageFile: File | undefined;
+    displayMode: string;
 }
 
 const ImageCanvas = (props: ImageCanvasProps) => {
     const [fileDataUrl, setFileDataUrl] = useState<string | undefined>();
+    const [loaded, setLoaded] = useState<boolean>(false);
 
     const fileReaderRef = useRef<FileReader>(new FileReader());
     const imgRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
-        window.onresize = () => {
-            if (imgRef.current) {
-            const ratio = imgRef.current.width / imgRef.current.height;
-            console.log(imgRef.current.width )
-            console.log("ldsllgd")
-            console.log("src", imgRef.current.src)
-            console.log("Ratio", ratio)
-            if (imgRef.current) {
-                if (ratio > 1) {
-                    imgRef.current.width = window.innerWidth;
-                    imgRef.current.height = window.innerWidth/ratio;
-                } else if (ratio < 1) {
-                    imgRef.current.height = window.innerHeight;
-                    imgRef.current.width = window.innerHeight * ratio
-                } else {
-                    imgRef.current.width = window.innerWidth;
-                    imgRef.current.height = window.innerHeight;
-                }
-            }
-        }
-        }
+        window.addEventListener("resize", resizeImage);
+
+        return () => window.removeEventListener("resize", resizeImage);
     }, [])
 
     useEffect(() => {
         if (props.imageFile && fileReaderRef.current) {
+            setLoaded(false)
             fileReaderRef.current.readAsDataURL(props.imageFile);
+            fileReaderRef.current.onload = (e) => {
+                if (typeof e.target?.result === 'string') {
+                    // setInterval(() => setLoaded(true), 1000);
+                    setFileDataUrl(e.target.result);
+                }
+            };
         }
     }, [props.imageFile]);
     
-    useEffect(() => {
-        fileReaderRef.current.onload = (e) => {
-            if (typeof e.target?.result === 'string') {
-                setFileDataUrl(e.target.result);
-                const img = new Image();
-                img.src = e.target.result;
-                setTimeout(() => {
-                    const ratio = img.width / img.height;
-                    console.log(img.width )
-                    console.log("ldsllgd")
-                    console.log("src", img.src)
-                    console.log("Ratio", ratio)
-                    if (imgRef.current) {
-                        if (ratio > 1) {
-                            imgRef.current.width = window.innerWidth;
-                            imgRef.current.height = window.innerWidth/ratio;
-                        } else if (ratio < 1) {
-                            imgRef.current.height = window.innerHeight;
-                            imgRef.current.width = window.innerHeight * ratio
-                        } else {
-                            imgRef.current.width = window.innerWidth;
-                            imgRef.current.height = window.innerHeight;
-                        }
-                    }
-                }, 25)
-                }
-        };
-    }, []);
 
     useEffect(() => {
-        if (imgRef) {
-            imgRef.current?.width
+        resizeImage();
+    }, [fileDataUrl, props.displayMode])
+
+    const resizeImage = () => {
+        console.log("r1r")
+        const img = imgRef.current
+        if (img) {
+
+            img.style.width = "inital";
+            img.style.height = "initial";
+            img.onload = function () {
+                console.log(img.width, img.height);
+            };
+            if (fileDataUrl) {
+
+            
+            img.src = fileDataUrl
+
+            const newImg = new Image();
+            newImg.src = fileDataUrl;
+            newImg.addEventListener("load", () => {
+                const ratio = newImg.width / newImg.height;
+                newImg.remove()
+                setLoaded(true)
+                console.log(ratio)
+                if (img) {
+                    switch (props.displayMode) {
+                        case "SBS":
+                            if (window.innerWidth > window.innerHeight) {
+                                img.width = window.innerWidth;
+                                img.height = window.innerWidth / ratio;
+                            }
+                            break;
+                        case "TB":
+                        default:
+                            if (window.innerWidth > window.innerHeight) {
+                                img.height = window.innerHeight;
+                                img.width = window.innerHeight * ratio
+                            }
+                            break;
+                    }
+                }
+            })
+
+
+
         }
-    })
+        }
+    }
 
     return (
         <div className="image-canvas" style={{backgroundImage: fileDataUrl}}>
-                {fileDataUrl && <img ref={imgRef} src={fileDataUrl} alt="Uploaded"/>}
+                {fileDataUrl && <img ref={imgRef} alt="Uploaded" style={{visibility:  loaded ? "visible" : "hidden"}}/>}
         </div>
     );
 };
