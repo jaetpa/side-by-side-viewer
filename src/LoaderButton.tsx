@@ -14,7 +14,7 @@ const LoaderButton = (props: LoaderButtonProps) => {
         
     }, [file, props.handleImageSelected])
 
-    const handleDrop = (e) => {
+    const handleDrop = (e: any) => {
         e.preventDefault();
         const files = Array.from<File>(e.dataTransfer.files);
         if (files) {
@@ -22,7 +22,7 @@ const LoaderButton = (props: LoaderButtonProps) => {
         }
     };
 
-    const handleDragOver = (e) => {
+    const handleDragOver = (e: any) => {
         e.preventDefault();
     };
 

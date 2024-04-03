@@ -9,7 +9,7 @@ const ImageCanvas = (props: ImageCanvasProps) => {
     const [fileDataUrl, setFileDataUrl] = useState<string | undefined>();
 
     const fileReaderRef = useRef<FileReader>(new FileReader());
-    const imgRef = useRef<HTMLImageElement | undefined>();
+    const imgRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
         if (props.imageFile && fileReaderRef.current) {
